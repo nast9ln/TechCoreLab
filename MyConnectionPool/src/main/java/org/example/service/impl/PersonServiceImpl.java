@@ -40,7 +40,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     public PersonDto read(Long id) {
-        return personMapper.toDto(personDao.findById(id).orElseThrow(() -> new RuntimeException()));
+        return personMapper.toDto(personDao.findById(id).orElseThrow(RuntimeException::new));
     }
 
     public void delete(Long id) {
