@@ -44,10 +44,10 @@ public class PersonMapper {
             return objectMapper.writeValueAsString(personDto);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            // FIXME: 6/2/2024 в случае ошибки нужно выбрасывать исключение, а не возвращать null
+            throw new RuntimeException("Error converting PersonDto to JSON", e);
         }
-        return null;
     }
+
 
     public PersonDto fromJson(Reader reader) throws IOException {
         return objectMapper.readValue(reader, PersonDto.class);

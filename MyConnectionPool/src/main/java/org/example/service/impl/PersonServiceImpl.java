@@ -6,6 +6,7 @@ import org.example.dto.PersonDto;
 import org.example.entity.Person;
 import org.example.entity.Role;
 import org.example.enums.RoleEnum;
+import org.example.exception.EntityNotFoundException;
 import org.example.mapper.PersonMapper;
 import org.example.service.PersonService;
 
@@ -27,20 +28,22 @@ public class PersonServiceImpl implements PersonService {
         Person person = personMapper.toEntity(personDto);
         person.setId(null);
         if (Objects.isNull(person.getRole())) {
-            person.setRole(roleDao.findByName(RoleEnum.USER).orElseThrow(()->new RuntimeException("Cannot find role")));
+            person.setRole(roleDao.findByName(RoleEnum.USER).orElseThrow(()->new EntityNotFoundException("Cannot find role")));
         }
         return personMapper.toDto(personDao.save(person));
     }
 
     public PersonDto update(PersonDto personDto) {
-        personDao.findById(personDto.getId()).orElseThrow(() -> new RuntimeException("Exc"));
+        personDao.findById(personDto.getId())
+                .orElseThrow(()-> new EntityNotFoundException("Person with id {0} not found", personDto.getId()));
         Person person = personMapper.toEntity(personDto);
         return personMapper.toDto(personDao.update(person));
 
     }
 
     public PersonDto read(Long id) {
-        return personMapper.toDto(personDao.findById(id).orElseThrow(RuntimeException::new));
+        return personMapper.toDto(personDao.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Person with id {0} not found", id)));
     }
 
     public void delete(Long id) {

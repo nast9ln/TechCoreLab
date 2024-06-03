@@ -3,6 +3,7 @@ package org.example.dao.impl;
 import org.example.dao.PersonDao;
 import org.example.dao.RoleDao;
 import org.example.entity.Person;
+import org.example.exception.LoginDuplicateException;
 import org.example.util.ConnectionManager;
 
 import java.sql.*;
@@ -34,11 +35,11 @@ public class PersonDaoImpl implements PersonDao {
                 person.setId(generatedKeys.getLong(1));
                 return person;
             } else {
-                throw new SQLException("Creating person failed, no ID obtained");
+                throw new LoginDuplicateException("Creating person failed, no ID obtained");
             }
         } catch (SQLException sqlException) {
             sqlException.printStackTrace();
-            throw new RuntimeException();
+            throw new LoginDuplicateException("the username is already in use ");
         }
     }
 

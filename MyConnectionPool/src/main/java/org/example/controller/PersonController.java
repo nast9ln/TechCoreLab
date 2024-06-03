@@ -27,14 +27,24 @@ public class PersonController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String strPersonId = req.getParameter("id");
-        resp.setContentType(WebConstant.TEXT_HTML);
-        PrintWriter printWriter = resp.getWriter();
-        PersonDto personDto = personService.read(Long.parseLong(strPersonId));
-        printWriter.write(personDto.getName());
-        printWriter.close();
-    }
+        try {
+            String strPersonId = req.getParameter("id");
+            if (strPersonId == null) {
+                handleError(resp, "ID parameter is missing", HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
 
+            Long personId = Long.parseLong(strPersonId);
+            PersonDto personDto = personService.read(personId);
+
+            resp.setContentType(WebConstant.APPLICATION_JSON);
+            resp.getWriter().write(personMapper.toJson(personDto));
+        } catch (NumberFormatException e) {
+            handleError(resp, "Invalid ID format", HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            handleError(resp, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PersonDto personDto = personMapper.fromJson(req.getReader());
@@ -48,10 +58,15 @@ public class PersonController extends HttpServlet {
         try {
             PersonDto personDto = personMapper.fromJson(request.getReader());
             PersonDto updatedPerson = personService.update(personDto);
+
             response.setContentType(WebConstant.APPLICATION_JSON);
             response.getWriter().write(personMapper.toJson(updatedPerson));
         } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                handleError(response, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 
@@ -71,6 +86,12 @@ public class PersonController extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void handleError(HttpServletResponse response, String message, int statusCode) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType(WebConstant.TEXT_HTML);
+        response.getWriter().write(message);
     }
 }
 
