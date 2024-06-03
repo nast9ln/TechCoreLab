@@ -29,6 +29,11 @@ public class PersonServiceImpl implements PersonService {
         person.setId(null);
         if (Objects.isNull(person.getRole())) {
             person.setRole(roleDao.findByName(RoleEnum.USER).orElseThrow(()->new EntityNotFoundException("Cannot find role")));
+        } else if (Objects.nonNull(person.getRole().getName())){
+            person.setRole(roleDao.findByName(person.getRole().getName()).orElseThrow(()-> new EntityNotFoundException("Cannot find role")));
+        } else if (Objects.nonNull(person.getRole().getId())){
+            person
+                    .setRole(roleDao.findById(personDto.getRole().getId()).orElseThrow(()-> new EntityNotFoundException("Cannot find role")));
         }
         return personMapper.toDto(personDao.save(person));
     }

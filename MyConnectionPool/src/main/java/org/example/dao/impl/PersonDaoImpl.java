@@ -77,19 +77,21 @@ public class PersonDaoImpl implements PersonDao {
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID)) {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            Person person = new Person();
             if (resultSet.next()) {
-                person = Person.builder()
+                Person person = Person.builder()
                         .id(resultSet.getLong("id"))
                         .name(resultSet.getString("name"))
                         .login(resultSet.getString("login"))
                         .registrationDate(resultSet.getTimestamp("registration_date").toInstant())
-                        .role(roleDao.findById(resultSet.getLong("role")).orElseThrow(()-> new RuntimeException("Error")))
+                        .role(roleDao.findById(resultSet.getLong("role")).orElseThrow(() -> new RuntimeException("Role not found")))
                         .build();
+                return Optional.of(person);
+            } else {
+                return Optional.empty();
             }
-            return Optional.ofNullable(person);
         } catch (SQLException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
+
 }

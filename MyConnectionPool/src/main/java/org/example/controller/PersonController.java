@@ -6,6 +6,7 @@ import org.example.constansts.WebConstant;
 import org.example.dao.impl.PersonDaoImpl;
 import org.example.dao.impl.RoleDaoImpl;
 import org.example.dto.PersonDto;
+import org.example.exception.EntityNotFoundException;
 import org.example.mapper.PersonMapper;
 import org.example.mapper.RoleMapper;
 import org.example.service.PersonService;
@@ -41,18 +42,27 @@ public class PersonController extends HttpServlet {
             resp.getWriter().write(personMapper.toJson(personDto));
         } catch (NumberFormatException e) {
             handleError(resp, "Invalid ID format", HttpServletResponse.SC_BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            handleError(resp, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
             handleError(resp, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        e.printStackTrace();
         }
     }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        PersonDto personDto = personMapper.fromJson(req.getReader());
-        PersonDto createdPerson = personService.create(personDto);
-        resp.setContentType(WebConstant.APPLICATION_JSON);
-        resp.getWriter().write(personMapper.toJson(createdPerson));
-    }
+        try {
+            PersonDto personDto = personMapper.fromJson(req.getReader());
+            PersonDto createdPerson = personService.create(personDto);
 
+            resp.setContentType(WebConstant.APPLICATION_JSON);
+            resp.getWriter().write(personMapper.toJson(createdPerson));
+        } catch (Exception e) {
+            handleError(resp, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        }
+    }
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         try {
