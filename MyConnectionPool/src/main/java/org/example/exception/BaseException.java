@@ -2,7 +2,7 @@ package org.example.exception;
 
 import java.text.MessageFormat;
 
-public class BaseException extends RuntimeException{
+public class BaseException extends RuntimeException {
     public BaseException() {
     }
 

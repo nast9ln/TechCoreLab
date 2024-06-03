@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface RoleDao {
     Optional<Role> findById(Long id);
-    Optional<Role> findByName (RoleEnum name);
+
+    Optional<Role> findByName(RoleEnum name);
 }

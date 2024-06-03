@@ -2,7 +2,7 @@ package org.example.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.example.constansts.WebConstant;
+import org.example.constanst.WebConstant;
 import org.example.dao.impl.PersonDaoImpl;
 import org.example.dao.impl.RoleDaoImpl;
 import org.example.dto.PersonDto;
@@ -11,13 +11,14 @@ import org.example.mapper.PersonMapper;
 import org.example.mapper.RoleMapper;
 import org.example.service.PersonService;
 import org.example.service.impl.PersonServiceImpl;
+import org.example.util.JspHelper;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @WebServlet("/person")
 @AllArgsConstructor
@@ -27,26 +28,28 @@ public class PersonController extends HttpServlet {
             new PersonMapper(new RoleMapper(), new ObjectMapper()), new RoleDaoImpl());
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         try {
-            String strPersonId = req.getParameter("id");
+            String strPersonId = req.getParameter(WebConstant.IDENTIFICATION_FIELD);
             if (strPersonId == null) {
-                handleError(resp, "ID parameter is missing", HttpServletResponse.SC_BAD_REQUEST);
+                req.setAttribute(WebConstant.ERROR_ATTRIBUTE, "ID parameter is missing");
+                req.getRequestDispatcher(JspHelper.getPath("error")).forward(req, resp);
                 return;
             }
 
             Long personId = Long.parseLong(strPersonId);
             PersonDto personDto = personService.read(personId);
-
-            resp.setContentType(WebConstant.APPLICATION_JSON);
-            resp.getWriter().write(personMapper.toJson(personDto));
+            req.setAttribute("person", personDto);
+            req.getRequestDispatcher(JspHelper.getPath("personDetail")).forward(req, resp);
         } catch (NumberFormatException e) {
-            handleError(resp, "Invalid ID format", HttpServletResponse.SC_BAD_REQUEST);
+            req.setAttribute(WebConstant.ERROR_ATTRIBUTE, "Invalid ID format");
+            req.getRequestDispatcher(JspHelper.getPath("error")).forward(req, resp);
         } catch (EntityNotFoundException e) {
-            handleError(resp, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
+            req.setAttribute(WebConstant.ERROR_ATTRIBUTE, e.getMessage());
+            req.getRequestDispatcher(JspHelper.getPath("error")).forward(req, resp);
         } catch (Exception e) {
-            handleError(resp, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        e.printStackTrace();
+            req.setAttribute(WebConstant.ERROR_ATTRIBUTE, "Error processing request: " + e.getMessage());
+            req.getRequestDispatcher(JspHelper.getPath("error")).forward(req, resp);
         }
     }
 
@@ -63,6 +66,7 @@ public class PersonController extends HttpServlet {
             e.printStackTrace();
         }
     }
+
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -81,7 +85,7 @@ public class PersonController extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String idParam = request.getParameter(WebConstant.IDENTIFICATION_FIELD);
             if (idParam == null) {
@@ -93,8 +97,10 @@ public class PersonController extends HttpServlet {
             Long id = Long.parseLong(idParam);
             personService.delete(id);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (NumberFormatException e) {
+            handleError(response, "Invalid Id format: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleError(response, "Error processing request: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

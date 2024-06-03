@@ -25,7 +25,7 @@ public class PersonMapper {
                 .name(personDto.getName())
                 .login(personDto.getLogin())
                 .registrationDate(personDto.getRegistrationDate())
-                .role(personDto.getRole()==null ? null : roleMapper.toEntity(personDto.getRole()))
+                .role(personDto.getRole() == null ? null : roleMapper.toEntity(personDto.getRole()))
                 .build();
     }
 
@@ -35,7 +35,7 @@ public class PersonMapper {
                 .name(person.getName())
                 .login(person.getLogin())
                 .registrationDate(person.getRegistrationDate())
-                .role(roleMapper.toDto(person.getRole()))
+                .role(person.getRole() == null ? null : roleMapper.toDto(person.getRole()))
                 .build();
     }
 

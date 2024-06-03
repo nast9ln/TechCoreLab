@@ -3,6 +3,7 @@ package org.example.dao.impl;
 import org.example.dao.PersonDao;
 import org.example.dao.RoleDao;
 import org.example.entity.Person;
+import org.example.exception.EntityNotFoundException;
 import org.example.exception.LoginDuplicateException;
 import org.example.util.ConnectionManager;
 
@@ -83,7 +84,7 @@ public class PersonDaoImpl implements PersonDao {
                         .name(resultSet.getString("name"))
                         .login(resultSet.getString("login"))
                         .registrationDate(resultSet.getTimestamp("registration_date").toInstant())
-                        .role(roleDao.findById(resultSet.getLong("role")).orElseThrow(() -> new RuntimeException("Role not found")))
+                        .role(roleDao.findById(resultSet.getLong("role")).orElseThrow(() -> new EntityNotFoundException("Role not found")))
                         .build();
                 return Optional.of(person);
             } else {

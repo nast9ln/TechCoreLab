@@ -1,6 +1,6 @@
 package org.example.exception;
 
-public class EntityNotFoundException extends BaseException{
+public class EntityNotFoundException extends BaseException {
     public EntityNotFoundException() {
     }
 

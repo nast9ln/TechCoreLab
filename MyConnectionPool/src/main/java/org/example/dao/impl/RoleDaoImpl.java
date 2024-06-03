@@ -23,7 +23,7 @@ public class RoleDaoImpl implements RoleDao {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Role role =  Role.builder()
+                Role role = Role.builder()
                         .id(resultSet.getLong("id"))
                         .name(RoleEnum.valueOf(resultSet.getString("name")))
                         .build();
@@ -52,7 +52,7 @@ public class RoleDaoImpl implements RoleDao {
                 return Optional.empty();
             }
         } catch (SQLException e) {
-           throw new RuntimeException("Error");
+            throw new RuntimeException("Error");
         }
     }
 }

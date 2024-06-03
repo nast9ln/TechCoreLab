@@ -1,6 +1,9 @@
 package org.example.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
@@ -10,7 +13,7 @@ import java.time.Instant;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person extends BaseEntity{
+public class Person extends BaseEntity {
     private String name;
     private Instant registrationDate;
     private String login;
