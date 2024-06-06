@@ -11,6 +11,7 @@ import org.example.util.PropertiesUtil;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 
 public class PersonDaoImpl implements PersonDao {
@@ -30,7 +31,7 @@ public class PersonDaoImpl implements PersonDao {
         try (Connection connection = ConnectionManager.get();
              PreparedStatement statement = connection.prepareStatement(MessageFormat.format(INSERT_PERSON, PropertiesUtil.get(DEFAULT_SCHEMA)), Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, person.getName());
-            statement.setDate(2, Date.valueOf(person.getRegistrationDate().atZone(ZoneId.systemDefault()).toLocalDate()));
+            statement.setTimestamp(2,  Timestamp.from(person.getRegistrationDate()));
             statement.setString(3, person.getLogin());
             statement.setLong(4, person.getRole().getId());
             statement.executeUpdate();
