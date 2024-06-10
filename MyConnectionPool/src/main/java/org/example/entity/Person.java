@@ -1,14 +1,15 @@
 package org.example.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 
-@Data
+@Entity
+@Table(name = "person", schema = "techcore")
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @AllArgsConstructor
@@ -17,5 +18,7 @@ public class Person extends BaseEntity {
     private String name;
     private Instant registrationDate;
     private String login;
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "role")
     private Role role;
 }

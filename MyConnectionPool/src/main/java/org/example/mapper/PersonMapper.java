@@ -1,55 +1,21 @@
 package org.example.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.dto.PersonDto;
 import org.example.entity.Person;
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 
-import java.io.IOException;
-import java.io.Reader;
+@Mapper(componentModel = "default", uses = {RoleMapper.class})
+public interface PersonMapper {
+    PersonMapper INSTANCE = Mappers.getMapper(PersonMapper.class);
 
-public class PersonMapper {
-    private final RoleMapper roleMapper;
-    private final ObjectMapper objectMapper;
+    @Mapping(target = "id", ignore = true)
+    Person create(PersonDto personDto);
 
-    public PersonMapper(RoleMapper roleMapper, ObjectMapper objectMapper) {
-        this.roleMapper = roleMapper;
-        this.objectMapper = objectMapper;
-        this.objectMapper.registerModule(new JavaTimeModule());
-    }
+    Person toEntity(PersonDto personDto);
 
-    public Person toEntity(PersonDto personDto) {
-        return Person.builder()
-                .id(personDto.getId())
-                .name(personDto.getName())
-                .login(personDto.getLogin())
-                .registrationDate(personDto.getRegistrationDate())
-                .role(personDto.getRole() == null ? null : roleMapper.toEntity(personDto.getRole()))
-                .build();
-    }
+    PersonDto toDto(Person person);
 
-    public PersonDto toDto(Person person) {
-        return PersonDto.builder()
-                .id(person.getId())
-                .name(person.getName())
-                .login(person.getLogin())
-                .registrationDate(person.getRegistrationDate())
-                .role(person.getRole() == null ? null : roleMapper.toDto(person.getRole()))
-                .build();
-    }
-
-    public String toJson(PersonDto personDto) {
-        try {
-            return objectMapper.writeValueAsString(personDto);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error converting PersonDto to JSON", e);
-        }
-    }
-
-
-    public PersonDto fromJson(Reader reader) throws IOException {
-        return objectMapper.readValue(reader, PersonDto.class);
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Person update(Person exPerson, @MappingTarget PersonDto newPerson);
 }

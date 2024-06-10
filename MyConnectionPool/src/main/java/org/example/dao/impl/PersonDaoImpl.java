@@ -4,22 +4,17 @@ import org.example.dao.PersonDao;
 import org.example.dao.RoleDao;
 import org.example.entity.Person;
 import org.example.exception.EntityNotFoundException;
-import org.example.exception.LoginDuplicateException;
-import org.example.util.ConnectionManager;
-import org.example.util.PropertiesUtil;
+import org.example.util.HibernateSessionFactory;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.text.MessageFormat;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Optional;
 
 public class PersonDaoImpl implements PersonDao {
-    private static final String DEFAULT_SCHEMA = "db.schema";
-    private static final String INSERT_PERSON = "INSERT INTO {0}.person (name, registration_date, login, role) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_PERSON = "UPDATE {0}.person SET name= ?, registration_date = ?, login = ?, role = ? WHERE id = ?";
-    private static final String DELETE_PERSON = "DELETE FROM {0}.person WHERE id = ?";
-    private static final String FIND_BY_ID = "SELECT id, name, registration_date, login, role FROM {0}.person WHERE id = ? ";
+    private static final Logger logger = LoggerFactory.getLogger(PersonDaoImpl.class);
     private final RoleDao roleDao;
 
     public PersonDaoImpl(RoleDao roleDao) {
@@ -28,74 +23,104 @@ public class PersonDaoImpl implements PersonDao {
 
     @Override
     public Person save(Person person) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(MessageFormat.format(INSERT_PERSON, PropertiesUtil.get(DEFAULT_SCHEMA)), Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, person.getName());
-            statement.setTimestamp(2,  Timestamp.from(person.getRegistrationDate()));
-            statement.setString(3, person.getLogin());
-            statement.setLong(4, person.getRole().getId());
-            statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                person.setId(generatedKeys.getLong(1));
-                return person;
-            } else {
-                throw new LoginDuplicateException("Creating person failed, no ID obtained");
+        Transaction transaction = null;
+        Session session = null;
+        try {
+            session = HibernateSessionFactory.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            session.persist(person);
+            transaction.commit();
+            logger.info("Person saved successfully: {}", person);
+            return person;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+                logger.error("Transaction rolled back due to an error");
             }
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            throw new LoginDuplicateException("the username is already in use ");
+            logger.error("Error saving person: {}", person, e);
+            throw new RuntimeException("Failed to save person", e);
+        } finally {
+            if (session != null) {
+                session.close();
+                logger.debug("Session closed");
+            }
         }
     }
 
 
     @Override
     public Person update(Person person) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(MessageFormat.format(UPDATE_PERSON, PropertiesUtil.get(DEFAULT_SCHEMA)))) {
-            statement.setString(1, person.getName());
-            statement.setTimestamp(2, Timestamp.from(person.getRegistrationDate()));
-            statement.setString(3, person.getLogin());
-            statement.setLong(4, person.getRole().getId());
-            statement.setLong(5, person.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException();
+        Transaction transaction = null;
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.merge(person);
+            transaction.commit();
+            logger.info("Person updated successfully: {}", person);
+            return person;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            logger.error("Error updating person: {}", person, e);
+            e.printStackTrace();
+            throw e;
         }
-        return person;
     }
 
     @Override
     public void delete(Long id) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(MessageFormat.format(DELETE_PERSON, PropertiesUtil.get(DEFAULT_SCHEMA)))) {
-            statement.setLong(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
+        Transaction transaction = null;
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Person person = session.get(Person.class, id);
+            if (person != null) {
+                session.remove(person);
+                logger.info("Person deleted successfully: {}", person);
+            } else {
+                throw new EntityNotFoundException("Person not found");
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            logger.error("Error deleting person with ID: {}", id, e);
             e.printStackTrace();
+            throw e;
         }
     }
 
     @Override
     public Optional<Person> findById(Long id) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(MessageFormat.format(FIND_BY_ID, PropertiesUtil.get(DEFAULT_SCHEMA)))) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Person person = Person.builder()
-                        .id(resultSet.getLong("id"))
-                        .name(resultSet.getString("name"))
-                        .login(resultSet.getString("login"))
-                        .registrationDate(resultSet.getTimestamp("registration_date").toInstant())
-                        .role(roleDao.findById(resultSet.getLong("role")).orElseThrow(() -> new EntityNotFoundException("Role not found")))
-                        .build();
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            Person person = session.get(Person.class, id);
+            if (person != null) {
+                person.setRole(roleDao.findById(person.getRole().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found")));
+                logger.info("Person found with ID: {}", id);
                 return Optional.of(person);
             } else {
+                logger.warn("Person not found with ID: {}", id);
                 return Optional.empty();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            logger.error("Error finding person with ID: {}", id, e);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean existsByLogin(String login) {
+        String hql = "SELECT count(p.id) FROM Person p WHERE p.login = :login";
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("login", login);
+            Long count = query.uniqueResult();
+            return count != null && count > 0;
+        } catch (Exception e) {
+            logger.error("Failed to check for existing login due to an error: {}", e.getMessage());
+            throw new RuntimeException("Database error checking login existence", e);
         }
     }
 
