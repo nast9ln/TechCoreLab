@@ -6,9 +6,12 @@
 <body>
 <% if (request.getAttribute("person") != null) { %>
 <h1>Person Details</h1>
-<p>ID: <%= ((org.example.dto.PersonDto)request.getAttribute("person")).getId() %></p>
-<p>Name: <%= ((org.example.dto.PersonDto)request.getAttribute("person")).getName() %></p>
-<p>Login: <%= ((org.example.dto.PersonDto)request.getAttribute("person")).getLogin() %></p>
+<p>ID: <%= ((org.example.dto.PersonDto) request.getAttribute("person")).getId() %>
+</p>
+<p>Name: <%= ((org.example.dto.PersonDto) request.getAttribute("person")).getName() %>
+</p>
+<p>Login: <%= ((org.example.dto.PersonDto) request.getAttribute("person")).getLogin() %>
+</p>
 
 
 <h2>Update Person</h2>
@@ -19,7 +22,8 @@
     <label for="login">Login:</label>
     <input type="text" id="login" name="login" value="${person.login}"><br>
     <label for="role">Role:</label>
-    <input type="text" id="role" name="role" value="<%= ((org.example.dto.PersonDto)request.getAttribute("person")).getRole().getId() %>"><br>
+    <input type="text" id="role" name="role"
+           value="<%= ((org.example.dto.PersonDto)request.getAttribute("person")).getRole().getId() %>"><br>
     <button type="submit">Update</button>
 </form>
 
@@ -28,7 +32,6 @@
     <input type="hidden" name="id" value="<%= ((org.example.dto.PersonDto)request.getAttribute("person")).getId() %>">
     <button type="submit">Delete</button>
 </form>
-
 
 
 <% } else { %>

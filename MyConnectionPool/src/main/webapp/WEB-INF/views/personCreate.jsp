@@ -23,7 +23,8 @@
     <select id="roleName" name="roleName">
         <option value="">Select Role</option>
         <% for (RoleEnum role : (RoleEnum[]) request.getAttribute("roles")) { %>
-        <option value="<%= role.name() %>"><%= role.name() %></option>
+        <option value="<%= role.name() %>"><%= role.name() %>
+        </option>
         <% } %>
     </select><br>
     <button type="submit">Create</button>

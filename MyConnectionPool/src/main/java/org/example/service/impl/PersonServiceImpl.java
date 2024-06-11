@@ -78,22 +78,41 @@ public class PersonServiceImpl implements PersonService {
         logger.info("Person deleted with ID: {}", id);
     }
 
+    /**
+     * Проверяет и устанавливает роль пользователя на основе переданных данных.
+     *
+     * @param person Объект Person, для которого необходимо проверить и установить роль.
+     * @return Объект Role, представляющий роль пользователя.
+     * @throws EntityNotFoundException Если не удалось найти соответствующую роль в базе данных.
+     */
     private Role checkAndSetRole(Person person) {
         Role role = person.getRole();
-        if (role == null || role.getName() == null) {
-            logger.info("Role is null or not defined. Setting default role to USER.");
-            return roleDao.findByName(RoleEnum.USER)
-                    .orElseThrow(() -> {
-                        logger.error("Default role USER not found");
-                        return new EntityNotFoundException("Cannot find role: USER");
-                    });
-        } else {
-            logger.info("Checking and setting role with name: {}", role.getName());
-            return roleDao.findByName(role.getName())
-                    .orElseThrow(() -> {
-                        logger.error("Cannot find role with name: {}", role.getName());
-                        return new EntityNotFoundException("Cannot find role: " + role.getName());
-                    });
+        if (role != null) {
+            Long roleId = role.getId();
+            String roleName = String.valueOf(role.getName());
+
+            if (roleId != null) {
+                logger.info("Checking and setting role with ID: {}", roleId);
+                return roleDao.findById(roleId)
+                        .orElseThrow(() -> {
+                            logger.error("Role with ID {} not found", roleId);
+                            return new EntityNotFoundException("Cannot find role with ID: " + roleId);
+                        });
+            } else if (roleName != null) {
+                logger.info("Checking and setting role with name: {}", roleName);
+                return roleDao.findByName(RoleEnum.valueOf(roleName.toUpperCase()))
+                        .orElseThrow(() -> {
+                            logger.error("Role with name {} not found", roleName);
+                            return new EntityNotFoundException("Cannot find role with name: " + roleName);
+                        });
+            }
         }
+
+        logger.info("Role is null or not defined. Setting default role to USER.");
+        return roleDao.findByName(RoleEnum.USER)
+                .orElseThrow(() -> {
+                    logger.error("Default role USER not found");
+                    return new EntityNotFoundException("Cannot find default role: USER");
+                });
     }
 }

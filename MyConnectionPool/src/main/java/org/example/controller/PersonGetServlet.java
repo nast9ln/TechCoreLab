@@ -9,6 +9,7 @@ import org.example.mapper.PersonMapper;
 import org.example.service.PersonService;
 import org.example.service.impl.PersonServiceImpl;
 import org.example.util.JspHelper;
+import org.example.util.ServletUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -50,11 +51,11 @@ public class PersonGetServlet extends HttpServlet {
             req.setAttribute(ATTRIBUTE_PERSON, personDto);
             req.getRequestDispatcher(JspHelper.getPath(VIEW_PERSON_DETAIL)).forward(req, resp);
         } catch (NumberFormatException e) {
-            handleException(req, resp, ERROR_INVALID_ID_FORMAT);
+            ServletUtil.handleError(req, resp, ERROR_INVALID_ID_FORMAT, VIEW_ERROR);
         } catch (EntityNotFoundException e) {
-            handleException(req, resp, e.getMessage());
+            ServletUtil.handleError(req, resp, e.getMessage(), VIEW_ERROR);
         } catch (Exception e) {
-            handleException(req, resp, "Error processing request: " + e.getMessage());
+            ServletUtil.handleError(req, resp, "Error processing request: " + e.getMessage(), VIEW_ERROR);
         }
     }
 
@@ -71,19 +72,5 @@ public class PersonGetServlet extends HttpServlet {
             throw new ServletException(ERROR_ID_MISSING);
         }
         return Long.parseLong(strPersonId);
-    }
-
-    /**
-     * Обрабатывает исключения и ошибки, перенаправляя на страницу ошибки.
-     *
-     * @param req HTTP-запрос.
-     * @param resp HTTP-ответ.
-     * @param errorMessage Сообщение об ошибке.
-     * @throws ServletException в случае ошибок сервлета.
-     * @throws IOException в случае ошибок ввода-вывода.
-     */
-    private void handleException(HttpServletRequest req, HttpServletResponse resp, String errorMessage) throws ServletException, IOException {
-        req.setAttribute(WebConstant.ERROR_ATTRIBUTE.getValue(), errorMessage);
-        req.getRequestDispatcher(JspHelper.getPath(VIEW_ERROR)).forward(req, resp);
     }
 }

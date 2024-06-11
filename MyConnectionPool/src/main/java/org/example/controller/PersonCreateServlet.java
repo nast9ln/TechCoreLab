@@ -1,15 +1,16 @@
 package org.example.controller;
 
-import org.example.constanst.WebConstant;
 import org.example.dao.impl.PersonDaoImpl;
 import org.example.dao.impl.RoleDaoImpl;
 import org.example.dto.PersonDto;
 import org.example.dto.RoleDto;
 import org.example.enums.RoleEnum;
+import org.example.exception.RoleValidationException;
 import org.example.mapper.PersonMapper;
 import org.example.service.PersonService;
 import org.example.service.impl.PersonServiceImpl;
 import org.example.util.JspHelper;
+import org.example.util.ServletUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +72,12 @@ public class PersonCreateServlet extends HttpServlet {
             req.setAttribute(ATTRIBUTE_PERSON, createdPerson);
             req.getRequestDispatcher(JspHelper.getPath(VIEW_PERSON_DETAIL)).forward(req, resp);
             logger.info("Person created successfully with ID: {}", createdPerson.getId());
-        } catch (ServletException e) {
+        } catch (RoleValidationException e) {
             logger.error("Role validation error: {}", e.getMessage());
-            handleError(req, resp, e.getMessage());
+            ServletUtil.handleError(req, resp, e.getMessage(), VIEW_ERROR);
         } catch (Exception e) {
             logger.error("Error processing person creation: {}", e.getMessage(), e);
-            handleError(req, resp, ERROR_PROCESSING_REQUEST + e.getMessage());
+            ServletUtil.handleError(req, resp, ERROR_PROCESSING_REQUEST + e.getMessage(), VIEW_ERROR);
         }
     }
 
@@ -104,6 +105,7 @@ public class PersonCreateServlet extends HttpServlet {
 
         if (roleIdParam != null && !roleIdParam.isBlank()) {
             Long roleId = Long.parseLong(roleIdParam);
+            logger.info("Setting role with ID: {}", roleId);
             RoleDto roleDto = new RoleDto();
             roleDto.setId(roleId);
             personDto.setRole(roleDto);
@@ -117,19 +119,5 @@ public class PersonCreateServlet extends HttpServlet {
                 throw new ServletException(ERROR_INVALID_ROLE_NAME);
             }
         }
-    }
-
-    /**
-     * Обрабатывает исключения и ошибки, перенаправляя на страницу ошибки.
-     *
-     * @param req HTTP-запрос.
-     * @param resp HTTP-ответ.
-     * @param errorMessage Сообщение об ошибке.
-     * @throws ServletException в случае ошибок сервлета.
-     * @throws IOException в случае ошибок ввода-вывода.
-     */
-    private void handleError(HttpServletRequest req, HttpServletResponse resp, String errorMessage) throws ServletException, IOException {
-        req.setAttribute(WebConstant.ERROR_ATTRIBUTE.getValue(), errorMessage);
-        req.getRequestDispatcher(JspHelper.getPath(VIEW_ERROR)).forward(req, resp);
     }
 }

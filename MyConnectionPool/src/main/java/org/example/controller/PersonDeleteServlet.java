@@ -1,12 +1,12 @@
 package org.example.controller;
 
-import org.example.constanst.WebConstant;
 import org.example.dao.impl.PersonDaoImpl;
 import org.example.dao.impl.RoleDaoImpl;
 import org.example.mapper.PersonMapper;
 import org.example.service.PersonService;
 import org.example.service.impl.PersonServiceImpl;
 import org.example.util.JspHelper;
+import org.example.util.ServletUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +51,10 @@ public class PersonDeleteServlet extends HttpServlet {
             logger.info("Successfully deleted person with ID: {}", id);
         } catch (NumberFormatException e) {
             logger.error("Invalid ID format for deletion: {}", e.getMessage());
-            handleException(req, resp, ERROR_INVALID_ID_FORMAT);
+            ServletUtil.handleError(req, resp, ERROR_INVALID_ID_FORMAT, VIEW_ERROR);
         } catch (Exception e) {
             logger.error("Error processing deletion request: {}", e.getMessage(), e);
-            handleException(req, resp, "Error processing request: " + e.getMessage());
+            ServletUtil.handleError(req, resp, "Error processing request: " + e.getMessage(), VIEW_ERROR);
         }
     }
 
@@ -63,7 +63,6 @@ public class PersonDeleteServlet extends HttpServlet {
      *
      * @param req HTTP-запрос.
      * @return ID пользователя.
-     * @throws ServletException если ID отсутствует в запросе.
      */
     private Long getPersonId(HttpServletRequest req) throws ServletException {
         String idParam = req.getParameter(PARAM_ID);
@@ -71,19 +70,5 @@ public class PersonDeleteServlet extends HttpServlet {
             throw new ServletException(ERROR_ID_MISSING);
         }
         return Long.parseLong(idParam);
-    }
-
-    /**
-     * Обрабатывает исключения и ошибки, перенаправляя на страницу ошибки.
-     *
-     * @param req HTTP-запрос.
-     * @param resp HTTP-ответ.
-     * @param errorMessage Сообщение об ошибке.
-     * @throws ServletException в случае ошибок сервлета.
-     * @throws IOException в случае ошибок ввода-вывода.
-     */
-    private void handleException(HttpServletRequest req, HttpServletResponse resp, String errorMessage) throws ServletException, IOException {
-        req.setAttribute(WebConstant.ERROR_ATTRIBUTE.getValue(), errorMessage);
-        req.getRequestDispatcher(JspHelper.getPath(VIEW_ERROR)).forward(req, resp);
     }
 }
