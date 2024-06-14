@@ -3,56 +3,39 @@ package org.example.dao.impl;
 import org.example.dao.RoleDao;
 import org.example.entity.Role;
 import org.example.enums.RoleEnum;
-import org.example.util.ConnectionManager;
+import org.example.util.HibernateSessionFactory;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Optional;
 
 public class RoleDaoImpl implements RoleDao {
-    private static final String FIND_BY_ID = "SELECT id, name FROM techcore.role WHERE id = ? ";
-    private static final String FIND_BY_NAME = "SELECT id, name FROM techcore.role WHERE name = ? ";
-
+    private static final Logger logger = LoggerFactory.getLogger(RoleDaoImpl.class);
 
     @Override
     public Optional<Role> findById(Long id) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID)) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Role role = Role.builder()
-                        .id(resultSet.getLong("id"))
-                        .name(RoleEnum.valueOf(resultSet.getString("name")))
-                        .build();
-                return Optional.ofNullable(role);
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error");
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            Role role = session.get(Role.class, id);
+            return Optional.ofNullable(role);
+        } catch (Exception e) {
+            logger.error("Failed to find role by ID: {}", id, e);
+            return Optional.empty();
         }
     }
 
     @Override
     public Optional<Role> findByName(RoleEnum name) {
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_NAME)) {
-            preparedStatement.setString(1, name.toString());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Role role = Role.builder()
-                        .id(resultSet.getLong("id"))
-                        .name(RoleEnum.valueOf(resultSet.getString("name")))
-                        .build();
-                return Optional.ofNullable(role);
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error");
+        String hql = "FROM Role R WHERE R.name = :roleName";
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
+            Query<Role> query = session.createQuery(hql, Role.class);
+            query.setParameter("roleName", name);
+            Role role = query.uniqueResult();
+            return Optional.ofNullable(role);
+        } catch (Exception e) {
+            logger.error("Failed to find role by name: {}", name, e);
+            return Optional.empty();
         }
     }
 }
