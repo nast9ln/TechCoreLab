@@ -24,9 +24,7 @@ public class PersonDaoImpl implements PersonDao {
     @Override
     public Person save(Person person) {
         Transaction transaction = null;
-        Session session = null;
-        try {
-            session = HibernateSessionFactory.getSessionFactory().openSession();
+        try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
             session.persist(person);
             transaction.commit();
@@ -39,11 +37,6 @@ public class PersonDaoImpl implements PersonDao {
             }
             logger.error("Error saving person: {}", person, e);
             throw new RuntimeException("Failed to save person", e);
-        } finally {
-            if (session != null) {
-                session.close();
-                logger.debug("Session closed");
-            }
         }
     }
 
