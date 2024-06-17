@@ -1,6 +1,6 @@
 package org.example.service.impl;
 
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.dao.PersonDao;
 import org.example.dao.RoleDao;
 import org.example.dto.PersonDto;
@@ -13,19 +13,18 @@ import org.example.mapper.PersonMapper;
 import org.example.service.PersonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
+@Service
 @Transactional
+@RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
     private final PersonDao personDao;
     private final PersonMapper personMapper;
     private final RoleDao roleDao;
     private static final Logger logger = LoggerFactory.getLogger(PersonServiceImpl.class);
-
-    public PersonServiceImpl(PersonDao personDao, PersonMapper personMapper, RoleDao roleDao) {
-        this.personDao = personDao;
-        this.personMapper = personMapper;
-        this.roleDao = roleDao;
-    }
 
     @Override
     public PersonDto create(PersonDto personDto) {
@@ -54,7 +53,7 @@ public class PersonServiceImpl implements PersonService {
                 .orElseThrow(() -> new EntityNotFoundException("Role with id {0} not found", newPerson.getRole().getId()));
         newPerson.setRole(role);
 
-        personDao.update(newPerson);
+        personDao.save(newPerson);
         return personMapper.toDto(newPerson);
     }
 
@@ -74,7 +73,14 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public void delete(Long id) {
         logger.info("Deleting person with ID: {}", id);
-        personDao.delete(id);
+
+        Person existingPerson = personDao.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Person with ID {} not found for update", id);
+                    return new EntityNotFoundException("Person with id {0} not found", id);
+                });
+
+        personDao.delete(existingPerson);
         logger.info("Person deleted with ID: {}", id);
     }
 

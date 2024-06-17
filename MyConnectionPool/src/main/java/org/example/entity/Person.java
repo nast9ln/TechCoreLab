@@ -1,9 +1,9 @@
 package org.example.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
