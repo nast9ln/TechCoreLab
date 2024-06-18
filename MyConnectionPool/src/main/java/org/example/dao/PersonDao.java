@@ -5,9 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Интерфейс для работы с сущностью Person в базе данных.
+ * Интерфейс для работы с сущностью {@link Person} в базе данных.
  */
-
 @Repository
 public interface PersonDao extends JpaRepository<Person, Long> {
     boolean existsByLogin(String login);

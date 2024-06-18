@@ -1,10 +1,10 @@
-/**
- * Сервис для работы с объектами PersonDto.
- */
 package org.example.service;
 
 import org.example.dto.PersonDto;
 
+/**
+ * Сервис для работы с объектами {@link PersonDto}.
+ */
 public interface PersonService {
     /**
      * Создает новую запись о человеке на основе переданных данных.

@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 @Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface PersonMapper {
     @Mapping(target = "id", ignore = true)
-    Person create(PersonDto personDto);
-
     Person toEntity(PersonDto personDto);
 
     PersonDto toDto(Person person);

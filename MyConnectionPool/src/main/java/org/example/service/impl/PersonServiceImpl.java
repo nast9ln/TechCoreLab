@@ -33,7 +33,7 @@ public class PersonServiceImpl implements PersonService {
             logger.error("Duplicate login detected for {}", personDto.getLogin());
             throw new LoginDuplicateException("Login already in use: " + personDto.getLogin());
         }
-        Person person = personMapper.create(personDto);
+        Person person = personMapper.toEntity(personDto);
         person.setRole(checkAndSetRole(person));
         PersonDto createdPersonDto = personMapper.toDto(personDao.save(person));
         logger.info("Person created with ID: {}", createdPersonDto.getId());

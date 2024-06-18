@@ -9,7 +9,7 @@ import java.util.Optional;
 
 
 /**
- * Интерфейс для работы с сущностью Role в базе данных.
+ * Интерфейс для работы с сущностью {@link Role} в базе данных.
  */
 @Repository
 public interface RoleDao extends JpaRepository<Role, Long> {
