@@ -1,12 +1,13 @@
 package org.example.mapper;
 
+import org.example.constant.GlobalConst;
 import org.example.dto.PersonDto;
 import org.example.entity.Person;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
 @Component
-@Mapper(componentModel = "spring", uses = {RoleMapper.class})
+@Mapper(componentModel = GlobalConst.COMPONENT_MODEL, uses = {RoleMapper.class})
 public interface PersonMapper {
     @Mapping(target = "id", ignore = true)
     Person toEntity(PersonDto personDto);

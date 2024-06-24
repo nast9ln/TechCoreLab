@@ -1,11 +1,10 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.dto.PersonDto;
 import org.example.entity.Person;
 import org.example.service.impl.PersonServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -15,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/person")
 @RequiredArgsConstructor
+@Slf4j
 public class PersonController {
 
     private final PersonServiceImpl personService;
-    private static final Logger logger = LoggerFactory.getLogger(PersonController.class);
 
     /**
      * Создает новый объект Person.
@@ -28,7 +27,7 @@ public class PersonController {
      */
     @PostMapping
     public PersonDto create(@RequestBody PersonDto dto) {
-        logger.info("create");
+        log.info("create");
         return personService.create(dto);
     }
 
@@ -40,7 +39,7 @@ public class PersonController {
      */
     @GetMapping("/{id}")
     public PersonDto read(@PathVariable Long id) {
-        logger.info("read");
+        log.info("read");
         return personService.read(id);
     }
 
@@ -51,7 +50,7 @@ public class PersonController {
      */
     @PutMapping
     public void update(@RequestBody PersonDto dto) {
-        logger.info("update");
+        log.info("update");
         personService.update(dto);
     }
 
@@ -62,7 +61,7 @@ public class PersonController {
      */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        logger.info("delete");
+        log.info("delete");
         personService.delete(id);
     }
 }

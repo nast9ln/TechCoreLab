@@ -1,6 +1,7 @@
 package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.dao.PersonDao;
 import org.example.dao.RoleDao;
 import org.example.dto.PersonDto;
@@ -20,30 +21,30 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PersonServiceImpl implements PersonService {
     private final PersonDao personDao;
     private final PersonMapper personMapper;
     private final RoleDao roleDao;
-    private static final Logger logger = LoggerFactory.getLogger(PersonServiceImpl.class);
 
     @Override
     public PersonDto create(PersonDto personDto) {
-        logger.info("Creating person with data: {}", personDto);
+        log.info("Creating person with data: {}", personDto);
         if (personDao.existsByLogin(personDto.getLogin())) {
-            logger.error("Duplicate login detected for {}", personDto.getLogin());
+            log.error("Duplicate login detected for {}", personDto.getLogin());
             throw new LoginDuplicateException("Login already in use: " + personDto.getLogin());
         }
         Person person = personMapper.toEntity(personDto);
         person.setRole(checkAndSetRole(person));
         PersonDto createdPersonDto = personMapper.toDto(personDao.save(person));
-        logger.info("Person created with ID: {}", createdPersonDto.getId());
+        log.info("Person created with ID: {}", createdPersonDto.getId());
         return createdPersonDto;
     }
 
     public PersonDto update(PersonDto personDto) {
         Person existingPerson = personDao.findById(personDto.getId())
                 .orElseThrow(() -> {
-                    logger.error("Person with ID {} not found for update", personDto.getId());
+                    log.error("Person with ID {} not found for update", personDto.getId());
                     return new EntityNotFoundException("Person with id {0} not found", personDto.getId());
                 });
 
@@ -58,30 +59,31 @@ public class PersonServiceImpl implements PersonService {
     }
 
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     @Override
     public PersonDto read(Long id) {
-        logger.info("Reading person with ID: {}", id);
+        log.info("Reading person with ID: {}", id);
         PersonDto personDto = personMapper.toDto(personDao.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("Person with ID {} not found", id);
+                    log.error("Person with ID {} not found", id);
                     return new EntityNotFoundException("Person with id " + id + " not found");
                 }));
-        logger.info("Person read with ID: {}", personDto.getId());
+        log.info("Person read with ID: {}", personDto.getId());
         return personDto;
     }
 
     @Override
     public void delete(Long id) {
-        logger.info("Deleting person with ID: {}", id);
+        log.info("Deleting person with ID: {}", id);
 
         Person existingPerson = personDao.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("Person with ID {} not found for update", id);
+                    log.error("Person with ID {} not found for update", id);
                     return new EntityNotFoundException("Person with id {0} not found", id);
                 });
 
         personDao.delete(existingPerson);
-        logger.info("Person deleted with ID: {}", id);
+        log.info("Person deleted with ID: {}", id);
     }
 
     /**
@@ -98,26 +100,26 @@ public class PersonServiceImpl implements PersonService {
             String roleName = String.valueOf(role.getName());
 
             if (roleId != null) {
-                logger.info("Checking and setting role with ID: {}", roleId);
+                log.info("Checking and setting role with ID: {}", roleId);
                 return roleDao.findById(roleId)
                         .orElseThrow(() -> {
-                            logger.error("Role with ID {} not found", roleId);
+                            log.error("Role with ID {} not found", roleId);
                             return new EntityNotFoundException("Cannot find role with ID: " + roleId);
                         });
             } else if (roleName != null) {
-                logger.info("Checking and setting role with name: {}", roleName);
+                log.info("Checking and setting role with name: {}", roleName);
                 return roleDao.findByName(RoleEnum.valueOf(roleName.toUpperCase()))
                         .orElseThrow(() -> {
-                            logger.error("Role with name {} not found", roleName);
+                            log.error("Role with name {} not found", roleName);
                             return new EntityNotFoundException("Cannot find role with name: " + roleName);
                         });
             }
         }
 
-        logger.info("Role is null or not defined. Setting default role to USER.");
+        log.info("Role is null or not defined. Setting default role to USER.");
         return roleDao.findByName(RoleEnum.USER)
                 .orElseThrow(() -> {
-                    logger.error("Default role USER not found");
+                    log.error("Default role USER not found");
                     return new EntityNotFoundException("Cannot find default role: USER");
                 });
     }
