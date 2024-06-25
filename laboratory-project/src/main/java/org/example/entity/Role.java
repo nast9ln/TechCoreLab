@@ -1,17 +1,17 @@
 package org.example.entity;
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.example.enums.RoleEnum;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "role", schema = "techcore")
+@Table(name = "role")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
