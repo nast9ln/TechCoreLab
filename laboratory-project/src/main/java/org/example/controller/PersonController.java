@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.dto.PersonDto;
 import org.example.entity.Person;
 import org.example.service.impl.PersonServiceImpl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -26,9 +27,9 @@ public class PersonController {
      * @return созданный объект PersonDto
      */
     @PostMapping
-    public PersonDto create(@RequestBody PersonDto dto) {
+    public ResponseEntity<PersonDto> create(@RequestBody PersonDto dto) {
         log.info("create");
-        return personService.create(dto);
+        return ResponseEntity.ok(personService.create(dto));
     }
 
     /**
@@ -38,30 +39,34 @@ public class PersonController {
      * @return объект PersonDto с заданным идентификатором
      */
     @GetMapping("/{id}")
-    public PersonDto read(@PathVariable Long id) {
+    public ResponseEntity<PersonDto> read(@PathVariable Long id) {
         log.info("read");
-        return personService.read(id);
+        return ResponseEntity.ok(personService.read(id));
     }
 
     /**
      * Обновляет существующий объект Person.
      *
      * @param dto объект PersonDto, содержащий обновленные данные для объекта Person
+     * @return ответ без тела с HTTP-статусом
      */
     @PutMapping
-    public void update(@RequestBody PersonDto dto) {
+    public ResponseEntity<Void> update(@RequestBody PersonDto dto) {
         log.info("update");
         personService.update(dto);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * Удаляет объект Person по заданному идентификатору.
      *
      * @param id идентификатор объекта Person, который необходимо удалить
+     * @return ответ без тела с HTTP-статусом
      */
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("delete");
         personService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,4 +1,4 @@
-package org.example.dao;
+package org.example.repository;
 
 import org.example.entity.Role;
 import org.example.enums.RoleEnum;
@@ -12,6 +12,6 @@ import java.util.Optional;
  * Интерфейс для работы с сущностью {@link Role} в базе данных.
  */
 @Repository
-public interface RoleDao extends JpaRepository<Role, Long> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByName(RoleEnum name);
 }

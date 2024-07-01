@@ -1,13 +1,13 @@
 package org.example.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "person", schema = "techcore")
+@Table(name = "person")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
