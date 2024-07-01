@@ -8,6 +8,6 @@
     <include file="db/changelog/01.create-role-table.xml" relativeToChangelogFile="true"/>
     <include file="db/changelog/02.create-person-table.xml" relativeToChangelogFile="true"/>
     <include file="db/changelog/03.add-foreign-key.xml" relativeToChangelogFile="true"/>
-    <include file="db/changelog/03.insert-values.xml" relativeToChangelogFile="true"/>
+    <include file="db/changelog/04.insert-values.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
