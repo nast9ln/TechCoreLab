@@ -16,6 +16,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final String[] AUTH_WHITELIST = {
+            "/",
+            "/auth/register",
+    };
     private final PersonDetailsServiceImpl personDetailsService;
 
     @Bean
@@ -23,9 +27,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers( "/", "/auth/register").permitAll()
-                        .requestMatchers("/user").authenticated()
-                        .requestMatchers("/admin").authenticated()
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
@@ -49,6 +51,4 @@ public class SecurityConfig {
         daoAuthenticationProvider.setUserDetailsService(personDetailsService);
         return daoAuthenticationProvider;
     }
-
-
 }

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthorizationController {
     private final PersonServiceImpl personService;
-
     @PostMapping("/register")
     public ResponseEntity<PersonDto> register(@RequestBody PersonDto personDto) {
         return ResponseEntity.ok(personService.create(personDto));
