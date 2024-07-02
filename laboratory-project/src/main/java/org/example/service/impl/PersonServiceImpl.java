@@ -117,7 +117,7 @@ public class PersonServiceImpl implements PersonService {
         }
 
         log.info("Role is null or not defined. Setting default role to USER.");
-        return roleRepository.findByName(RoleEnum.USER)
+        return roleRepository.findByName(RoleEnum.ROLE_USER)
                 .orElseThrow(() -> {
                     log.error("Default role USER not found");
                     return new EntityNotFoundException("Cannot find default role: USER");
