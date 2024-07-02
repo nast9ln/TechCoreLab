@@ -1,38 +1,33 @@
 package org.example.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.security.PersonDetailsServiceImpl;
+import org.example.service.impl.PersonDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig  {
+public class SecurityConfig {
     private final PersonDetailsServiceImpl personDetailsService;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/css/**", "/favicon.ico", "/", "/index").permitAll()
+                        .requestMatchers( "/", "/auth/register").permitAll()
                         .requestMatchers("/user").authenticated()
                         .requestMatchers("/admin").authenticated()
                         .anyRequest().authenticated()
                 )
-   //             .httpBasic(Customizer.withDefaults());
                 .formLogin(login -> login
                         .defaultSuccessUrl("/")
                         .permitAll())
@@ -43,21 +38,17 @@ public class SecurityConfig  {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
-        auth.userDetailsService(personDetailsService).passwordEncoder(passwordEncoder());
-        return auth.build();
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(personDetailsService);
+        return daoAuthenticationProvider;
     }
 
-    @Bean
-    UserDetailsManager inMemoryUserDetailsManager() {
-        UserDetails user1 = User.withUsername("user").password("{noop}password").roles("USER").build();
-        UserDetails user2 = User.withUsername("admin").password("{noop}password").roles("USER", "ADMIN").build();
-        return new InMemoryUserDetailsManager(user1, user2);
-    }
+
 }

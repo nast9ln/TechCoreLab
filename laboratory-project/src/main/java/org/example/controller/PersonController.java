@@ -19,19 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class PersonController {
 
     private final PersonServiceImpl personService;
-
-    /**
-     * Создает новый объект Person.
-     *
-     * @param dto объект PersonDto, содержащий данные для создания нового объекта Person
-     * @return созданный объект PersonDto
-     */
-    @PostMapping
-    public ResponseEntity<PersonDto> create(@RequestBody PersonDto dto) {
-        log.info("create");
-        return ResponseEntity.ok(personService.create(dto));
-    }
-
     /**
      * Возвращает объект Person по заданному идентификатору.
      *
