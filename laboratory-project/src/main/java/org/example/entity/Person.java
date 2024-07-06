@@ -18,6 +18,7 @@ public class Person extends BaseEntity {
     private String name;
     private Instant registrationDate;
     private String login;
+    private String password;
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "role")
     private Role role;

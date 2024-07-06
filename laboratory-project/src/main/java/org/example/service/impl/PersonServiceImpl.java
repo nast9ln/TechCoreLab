@@ -12,6 +12,7 @@ import org.example.mapper.PersonMapper;
 import org.example.repository.PersonRepository;
 import org.example.repository.RoleRepository;
 import org.example.service.PersonService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public PersonDto create(PersonDto personDto) {
@@ -36,6 +38,7 @@ public class PersonServiceImpl implements PersonService {
         Person person = personMapper.toEntity(personDto);
         person.setRole(checkAndSetRole(person));
         person.setRegistrationDate(Instant.now());
+        person.setPassword(passwordEncoder.encode(personDto.getPassword()));
         PersonDto createdPersonDto = personMapper.toDto(personRepository.save(person));
         log.info("Person created with ID: {}", createdPersonDto.getId());
         return createdPersonDto;
@@ -53,7 +56,7 @@ public class PersonServiceImpl implements PersonService {
         Role role = roleRepository.findById(newPerson.getRole().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Role with id {0} not found", newPerson.getRole().getId()));
         newPerson.setRole(role);
-
+        newPerson.setPassword(passwordEncoder.encode(personDto.getPassword()));
         personRepository.save(newPerson);
         return personMapper.toDto(newPerson);
     }
@@ -117,7 +120,7 @@ public class PersonServiceImpl implements PersonService {
         }
 
         log.info("Role is null or not defined. Setting default role to USER.");
-        return roleRepository.findByName(RoleEnum.USER)
+        return roleRepository.findByName(RoleEnum.ROLE_USER)
                 .orElseThrow(() -> {
                     log.error("Default role USER not found");
                     return new EntityNotFoundException("Cannot find default role: USER");

@@ -11,4 +11,11 @@ spring:
     default-schema: public
     drop-first: true
     enabled: true
-
+  security:
+    user:
+      name: user
+      password: user
+  session:
+    timeout: 180m
+    jdbc:
+      initialize-schema: always

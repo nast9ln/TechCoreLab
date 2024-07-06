@@ -18,4 +18,5 @@ public class PersonDto extends BaseDto {
     private Instant registrationDate;
     private String login;
     private RoleDto role;
+    private String password;
 }

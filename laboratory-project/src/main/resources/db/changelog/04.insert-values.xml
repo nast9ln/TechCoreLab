@@ -6,9 +6,26 @@
 
     <changeSet id="insert-values" author="Anastasia">
         <sql>INSERT INTO role (name)
-             VALUES ('USER'),
-                    ('ADMIN');
+             VALUES ('ROLE_USER'),
+                    ('ROLE_ADMIN');
         </sql>
+    </changeSet>
+
+    <changeSet id="insert-values-person" author="Anastasia">
+        <insert tableName="person">
+            <column name="login" value="user"/>
+            <column name="name" value="User Name"/>
+            <column name="registration_date" value="2023-07-01T00:00:00"/>
+            <column name="role" value="1"/>
+            <column name="password" value="$2a$10$m77tSpKsf79rQsmdgz6BJud5MFvuNgSlDeCouIkcXQkmOCfVO5h0O"/>
+        </insert>
+        <insert tableName="person">
+            <column name="login" value="admin"/>
+            <column name="name" value="Admin Name"/>
+            <column name="registration_date" value="2023-07-01T00:00:00"/>
+            <column name="role" value="2"/>
+            <column name="password" value="$2a$10$m77tSpKsf79rQsmdgz6BJud5MFvuNgSlDeCouIkcXQkmOCfVO5h0O"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>
