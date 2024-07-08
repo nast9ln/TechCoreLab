@@ -19,17 +19,12 @@ import org.springframework.security.core.GrantedAuthority;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role extends BaseEntity implements GrantedAuthority {
+public class Role extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RoleEnum name;
 
     public Role(Long id, RoleEnum name) {
         super(id);
         this.name = name;
-    }
-
-    @Override
-    public String getAuthority() {
-        return name.name();
     }
 }

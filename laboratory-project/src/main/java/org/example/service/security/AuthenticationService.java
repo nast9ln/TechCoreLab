@@ -1,9 +1,9 @@
-package org.example.service.impl;
+package org.example.service.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.AuthenticationRequest;
-import org.example.dto.AuthenticationResponse;
-import org.example.dto.JwtPerson;
+import org.example.dto.security.AuthenticationRequest;
+import org.example.dto.security.AuthenticationResponse;
+import org.example.dto.security.JwtPerson;
 import org.example.entity.Person;
 import org.example.enums.RoleEnum;
 import org.example.exception.EntityNotFoundException;
@@ -37,7 +37,7 @@ public class AuthenticationService {
                         request.getPassword()
                 ))
                 .registrationDate(Instant.now())
-                .role(roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new EntityNotFoundException()))
+                .role(roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(EntityNotFoundException::new))
                 .build();
         try {
             person = personRepository.save(person);

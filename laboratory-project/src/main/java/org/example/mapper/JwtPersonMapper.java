@@ -1,7 +1,7 @@
 package org.example.mapper;
 
 import org.example.constant.GlobalConst;
-import org.example.dto.JwtPerson;
+import org.example.dto.security.JwtPerson;
 import org.example.entity.Person;
 import org.mapstruct.Mapper;
 

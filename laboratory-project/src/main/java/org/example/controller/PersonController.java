@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.PersonDto;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
  * REST контроллер для управления сущностями {@link Person}.
  * Обрабатывает HTTP-запросы для создания, чтения, обновления и удаления объектов {@link Person}.
  */
+
+@Tag(name = "Контроллер пользователя")
 @RestController
 @RequestMapping("/person")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class PersonController {
      * @param id идентификатор объекта Person
      * @return объект PersonDto с заданным идентификатором
      */
+    @Operation(summary = "Получение пользователя")
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> read(@PathVariable Long id) {
         log.info("read");
@@ -38,6 +43,7 @@ public class PersonController {
      * @param dto объект PersonDto, содержащий обновленные данные для объекта Person
      * @return ответ без тела с HTTP-статусом
      */
+    @Operation(summary = "Обновление пользователя")
     @PutMapping
     public ResponseEntity<Void> update(@RequestBody PersonDto dto) {
         log.info("update");
@@ -51,6 +57,7 @@ public class PersonController {
      * @param id идентификатор объекта Person, который необходимо удалить
      * @return ответ без тела с HTTP-статусом
      */
+    @Operation(summary = "Удаление пользователя с помощью id")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("delete");
@@ -58,6 +65,7 @@ public class PersonController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Удаление пользователя с помощью токена")
     @DeleteMapping
     public ResponseEntity<Void> delete() {
         log.info("delete");

@@ -1,11 +1,9 @@
-package org.example.security;
+package org.example.service.security;
 
-import org.example.dto.JwtPerson;
-import org.example.entity.Person;
+import org.example.dto.security.JwtPerson;
 import org.example.exception.JwtParsingException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

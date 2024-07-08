@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,6 +49,6 @@ public class JwtPerson implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

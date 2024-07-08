@@ -4,11 +4,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.example.dto.JwtPerson;
-import org.example.service.impl.JwtService;
-import org.example.service.impl.PersonDetailsServiceImpl;
+import org.example.dto.security.JwtPerson;
+import org.example.exception.EntityNotFoundException;
+import org.example.service.security.JwtService;
+import org.example.service.security.PersonDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -22,13 +23,13 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final PersonDetailsServiceImpl personDetailService;
+    private final PersonDetailsService personDetailService;
 
     @Override
     protected void doFilterInternal(
-            @NotNull HttpServletRequest request,
-            @NotNull HttpServletResponse response,
-            @NotNull FilterChain filterChain) throws ServletException, IOException {
+            HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userLogin;
@@ -39,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userLogin = jwtService.extractLogin(jwt);
 
+        try {
         if (Objects.nonNull(userLogin) && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
             JwtPerson userDetails = personDetailService.loadUserByUsername(userLogin);
             if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -52,5 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+        } catch (EntityNotFoundException ex) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write(ex.getMessage());
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +44,6 @@ public class AuthenticationRequest implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
