@@ -36,4 +36,6 @@ public interface PersonService {
      * @param id идентификатор человека, чью запись необходимо удалить
      */
     void delete(Long id);
+
+    void delete();
 }

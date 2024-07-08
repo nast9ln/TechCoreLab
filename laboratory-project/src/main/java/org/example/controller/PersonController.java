@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class PersonController {
 
     private final PersonServiceImpl personService;
+
     /**
      * Возвращает объект Person по заданному идентификатору.
      *
@@ -56,4 +57,12 @@ public class PersonController {
         personService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete() {
+        log.info("delete");
+        personService.delete();
+        return ResponseEntity.ok().build();
+    }
+
 }
