@@ -108,6 +108,7 @@ class PersonServiceImplTest {
         updatedPerson.setRole(updatedRole);
 
         when(personRepository.findById(personDto.getId())).thenReturn(Optional.of(existingPerson));
+        when(personMapper.toEntity(personDto)).thenReturn(updatedPerson);
         when(personMapper.update(existingPerson, personDto)).thenReturn(updatedPerson);
         when(roleRepository.findById(updatedPerson.getRole().getId())).thenReturn(Optional.of(updatedRole));
         when(passwordEncoder.encode(personDto.getPassword())).thenReturn("encodedNewPassword");
