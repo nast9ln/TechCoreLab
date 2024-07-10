@@ -14,6 +14,7 @@ public interface PersonMapper {
 
     PersonDto toDto(Person person);
 
+    @Mapping(target = "role", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Person update(@MappingTarget Person existingPerson, PersonDto newPersonDto);
 }

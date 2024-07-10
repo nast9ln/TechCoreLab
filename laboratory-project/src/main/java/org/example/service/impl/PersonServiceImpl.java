@@ -2,6 +2,7 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.dto.security.JwtPerson;
 import org.example.dto.PersonDto;
 import org.example.entity.Person;
 import org.example.entity.Role;
@@ -11,6 +12,7 @@ import org.example.exception.LoginDuplicateException;
 import org.example.mapper.PersonMapper;
 import org.example.repository.PersonRepository;
 import org.example.repository.RoleRepository;
+import org.example.service.security.JwtAuthorizationService;
 import org.example.service.PersonService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class PersonServiceImpl implements PersonService {
     private final PersonMapper personMapper;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtAuthorizationService jwtAuthorizationService;
+
 
     @Override
     public PersonDto create(PersonDto personDto) {
@@ -51,13 +55,12 @@ public class PersonServiceImpl implements PersonService {
                     return new EntityNotFoundException("Person with id {0} not found", personDto.getId());
                 });
 
-        Person newPerson = personMapper.update(existingPerson, personDto);
 
-        Role role = roleRepository.findById(newPerson.getRole().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Role with id {0} not found", newPerson.getRole().getId()));
-        newPerson.setRole(role);
-        newPerson.setPassword(passwordEncoder.encode(personDto.getPassword()));
-        personRepository.save(newPerson);
+        Person newPerson = personMapper.toEntity(personDto);
+        if (personDto.getPassword() != null && !personDto.getPassword().isEmpty()) {
+            newPerson.setPassword(passwordEncoder.encode(personDto.getPassword()));
+        }
+        personRepository.save(personMapper.update(existingPerson, personDto));
         return personMapper.toDto(newPerson);
     }
 
@@ -81,12 +84,24 @@ public class PersonServiceImpl implements PersonService {
 
         Person existingPerson = personRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Person with ID {} not found for update", id);
+                    log.error("Person with ID {} not found for delete", id);
                     return new EntityNotFoundException("Person with id {0} not found", id);
                 });
 
         personRepository.delete(existingPerson);
         log.info("Person deleted with ID: {}", id);
+    }
+
+    @Override
+    public void delete() {
+        log.info("Deleting person with token");
+        JwtPerson jwtPerson = jwtAuthorizationService.extractJwtPerson();
+        Person existingPerson = personRepository.findById(jwtPerson.getId())
+                .orElseThrow(() -> {
+                    log.error("Person with ID {} not found for delete", jwtPerson.getId());
+                    return new EntityNotFoundException("Person with id {0} not found", jwtPerson.getId());
+                });
+        personRepository.delete(existingPerson);
     }
 
     /**

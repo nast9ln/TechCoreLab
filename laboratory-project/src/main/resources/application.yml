@@ -19,3 +19,6 @@ spring:
     timeout: 180m
     jdbc:
       initialize-schema: always
+
+jwt:
+  secret: sdfslsjdgsgkjlsjksdgksdafhaksfgkafghagfahgfsjasfgkjaf
